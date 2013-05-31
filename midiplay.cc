@@ -880,7 +880,7 @@ public:
                                 FakeDOSshell = true;
                                 //passthru
                             case 'q': case 'Q': case 3:
-                            #if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__)
+                            #if !((!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__))
                             case 27:
                             #endif
                                 QuitFlag=true; break;
