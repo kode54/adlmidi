@@ -27,7 +27,7 @@ typedef struct vswprintf {} swprintf;
 # include <dos.h>
 # define BIOStimer _farpeekl(_dos_ds, 0x46C)
 static const unsigned NewTimerFreq = 209;
-#elif !defined(__WIN32__) || defined(__CYGWIN__)
+#elif !defined(__APPLE__) && (!defined(__WIN32__) || defined(__CYGWIN__))
 # include <termio.h>
 # include <fcntl.h>
 # include <sys/ioctl.h>
@@ -420,7 +420,7 @@ class Input
 #ifdef __WIN32__
     void* inhandle;
 #endif
-#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__)
+#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__)
     struct termio back;
 #endif
 public:
@@ -429,7 +429,7 @@ public:
 #ifdef __WIN32__
         inhandle = GetStdHandle(STD_INPUT_HANDLE);
 #endif
-#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__)
+#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__)
         ioctl(0, TCGETA, &back);
         struct termio term = back;
         term.c_lflag &= ~(ICANON|ECHO);
@@ -440,7 +440,7 @@ public:
     }
     ~Input()
     {
-#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__)
+#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__)
         if(ioctl(0, TCSETA, &back) < 0)
             fcntl(0, F_SETFL, fcntl(0, F_GETFL) &~ O_NONBLOCK);
 #endif
@@ -466,7 +466,7 @@ public:
                 return c;
         }   }
 #endif
-#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__)
+#if (!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__)
         char c = 0;
         if(read(0, &c, 1) == 1) return c;
 #endif
@@ -882,7 +882,7 @@ public:
                                 FakeDOSshell = true;
                                 //passthru
                             case 'q': case 'Q': case 3:
-                            #if !((!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__))
+                            #if !((!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__))
                             case 27:
                             #endif
                                 QuitFlag=true; break;
@@ -2723,7 +2723,7 @@ public:
             case '-': case 'K': case 'D': NextGM(-1); break;
             case '+': case 'M': case 'C': NextGM(+1); break;
             case 3:
-        #if !((!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__))
+        #if !((!defined(__WIN32__) || defined(__CYGWIN__)) && !defined(__DJGPP__) && !defined(__APPLE__))
             case 27:
         #endif
                 QuitFlag=true; break;
@@ -2820,7 +2820,7 @@ int main(int argc, char** argv)
 #ifdef __DJGPP__
         "ADLMIDI_A: MIDI player for OPL3 hardware\n"
 #else
-        "ADLMIDI: MIDI player for Linux and Windows with OPL3 emulation\n"
+        "ADLMIDI: MIDI player for Linux, Mac OS X and Windows with OPL3 emulation\n"
 #endif
     );
     std::fflush(stdout);
